@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect} from "react";
 
-const FormAddSubs = ({type,price,setType,setPrice,subs,setSubs}) => {
+const FormAddSubs = ({type,price,setType,setPrice,subs,setSubs,editId,setEditId,spent,count}) => {
 
     const [error,setError] = useState(false);
+    const [errorMoney,setErrorMoney] = useState(false);
 
     const handleSubs = e => {
         e.preventDefault();
@@ -10,18 +11,37 @@ const FormAddSubs = ({type,price,setType,setPrice,subs,setSubs}) => {
             setError(true);
             return;
         }
-        setError(false);
 
-        const data = {
-            type : type,
-            price: price,
-            id: Date.now(),
+        if((count-spent) < Number(price)){
+            setErrorMoney(true);
+            return;
         }
-    
-        setSubs([...subs,data]);
+
+        setError(false);
+        setErrorMoney(false);
+
+        //edicion de item
+        if(editId != ""){
+            setEditId("");
+            const newSubs = subs.map(item=>{
+                if(item.id === editId){
+                    item.type = type;
+                    item.price = price;
+                }
+                return item;
+            })
+            setSubs(newSubs);
+        }else{//guardado de item
+            const data = {
+                type : type,
+                price: price,
+                id: Date.now(),
+            }
+            setSubs([...subs,data]);
+        }
+
         setType("");
         setPrice("");
-        console.log(subs);
     }
 
     return (
@@ -41,9 +61,11 @@ const FormAddSubs = ({type,price,setType,setPrice,subs,setSubs}) => {
                 </select>
                 <p>Cantidad:</p>
                 <input type="number" placeholder="$20" onChange={ e=> setPrice(e.target.value)} value={price}/>
-                <input type="submit" value="Agregar"/>
+                {editId != ""? <input type="submit" value="Guardar"/>:<input type="submit" value="Agregar"/>}
+                
             </form>
             {error? <p className="error">Campos invalidos</p>:null}
+            {errorMoney? <p className="error">No tienes presupuesto</p>:null}
         </div>
     );
 }

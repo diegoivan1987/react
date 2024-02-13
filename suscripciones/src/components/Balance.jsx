@@ -1,11 +1,23 @@
+import { useEffect, useState } from "react";
 import {moneyFormat} from "../helpers"
 
-const Balance = ({count}) => {
+const Balance = ({count,subs,spent,setSpent}) => {
+    
+
+    const updateBalance = () => {
+        const spendLocal = subs.reduce((total,item) => Number(item.price)+total,0);
+        setSpent(spendLocal);
+    }
+
+    useEffect(() => {
+        updateBalance();
+    },[subs])
+
     return (
         <div className="balance">
             <h3>Presupuesto: {moneyFormat(Number(count))}</h3>
-            <h3>Disponible: {moneyFormat(Number(count))}</h3>
-            <h3>Gastado: {moneyFormat(Number(count))}</h3>
+            <h3>Disponible: {moneyFormat(Number(count-spent))}</h3>
+            <h3>Gastado: {moneyFormat(Number(spent))}</h3>
         </div>
     )
 }
